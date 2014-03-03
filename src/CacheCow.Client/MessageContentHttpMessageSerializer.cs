@@ -54,7 +54,7 @@ namespace CacheCow.Client
 							        {
 										TraceWriter.WriteLine("SerializeAsync - after ReadAsByteArrayAsync", TraceLevel.Verbose);
 										return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite,
-											buffer, 0, buffer.Length, null, TaskCreationOptions.AttachedToParent);						                                                		
+											buffer, 0, buffer.Length, null, TaskCreationOptions.None);						                                                		
 							        }
 								);
 
@@ -69,7 +69,7 @@ namespace CacheCow.Client
 					// All in-memory and CPU-bound so no need to async
 					var buffer = httpMessageContent.ReadAsByteArrayAsync().Result;
 					return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite,
-						buffer, 0, buffer.Length, null, TaskCreationOptions.AttachedToParent);
+						buffer, 0, buffer.Length, null, TaskCreationOptions.None);
 				}
 			}
 				);
@@ -88,7 +88,7 @@ namespace CacheCow.Client
 							buffer =>
 								{
 									return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite,
-										buffer, 0, buffer.Length, null, TaskCreationOptions.AttachedToParent);
+										buffer, 0, buffer.Length, null, TaskCreationOptions.None);
 								});
 					});
 			}
@@ -100,7 +100,7 @@ namespace CacheCow.Client
 					buffer =>
 						{
 							return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite,
-							      buffer, 0, buffer.Length, null, TaskCreationOptions.AttachedToParent);
+							      buffer, 0, buffer.Length, null, TaskCreationOptions.None);
 						}
 					);
 

@@ -23,13 +23,13 @@ namespace CacheCow.Client.Tests
 		{
             var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CacheCow.Client.Tests.Data.Response.cs");
 			var serializer = new MessageContentHttpMessageSerializer();
-			var response = serializer.DeserializeToResponseAsync(stream).Result;
+			var response = Task.Factory.StartNew( () => serializer.DeserializeToResponseAsync(stream).Result).Result;
 
 			var memoryStream = new MemoryStream();
-			serializer.SerializeAsync(TaskHelpers.FromResult(response), memoryStream).Wait();
+			Task.Factory.StartNew(() => serializer.SerializeAsync(TaskHelpers.FromResult(response), memoryStream).Wait()).Wait();
 
 			memoryStream.Position = 0;
-			var response2 = serializer.DeserializeToResponseAsync(memoryStream).Result;
+			var response2 = Task.Factory.StartNew( () => serializer.DeserializeToResponseAsync(memoryStream).Result).Result;
 			var result = DeepComparer.Compare(response, response2);
 			if(result.Count()>0)
 				Assert.Fail(string.Join("\r\n", result));
@@ -40,18 +40,17 @@ namespace CacheCow.Client.Tests
 		{
             var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CacheCow.Client.Tests.Data.Request.cs");
 			var serializer = new MessageContentHttpMessageSerializer();
-			var request = serializer.DeserializeToRequestAsync(stream).Result;
+			var request = Task.Factory.StartNew(() => serializer.DeserializeToRequestAsync(stream).Result).Result;
 
 			var memoryStream = new MemoryStream();
-			serializer.SerializeAsync(request, memoryStream).Wait();
+			Task.Factory.StartNew( () => serializer.SerializeAsync(request, memoryStream).Wait()).Wait();
 
 			memoryStream.Position = 0;
-			var request2 = serializer.DeserializeToRequestAsync(memoryStream).Result;
+			var request2 = Task.Factory.StartNew(() => serializer.DeserializeToRequestAsync(memoryStream).Result).Result;
 			var result = DeepComparer.Compare(request, request2);
 
-			// !! Ignore this until RTM since this is fixed. See http://aspnetwebstack.codeplex.com/workitem/303
-			//if (result.Count() > 0)
-				//Assert.Fail(string.Join("\r\n", result));
+			if (result.Count() > 0)
+				Assert.Fail(string.Join("\r\n", result));
 		}
 
 		[Test]

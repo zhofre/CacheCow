@@ -25,7 +25,8 @@ namespace CacheCow.Client
 			var result = _responseCache.Get(key.HashBase64);
 			if (result!=null)
 			{
-                response = _messageSerializer.DeserializeToResponseAsync(new MemoryStream((byte[])result)).Result;
+			    var task = _messageSerializer.DeserializeToResponseAsync(new MemoryStream((byte[])result));
+			    response = Task.Factory.StartNew(() => task.Result).Result;
 			}
 			return result!=null;
 		}
@@ -36,9 +37,10 @@ namespace CacheCow.Client
 			var req = response.RequestMessage;
 			response.RequestMessage = null;
 			var memoryStream = new MemoryStream();
-			_messageSerializer.SerializeAsync(TaskHelpers.FromResult(response), memoryStream).Wait();
+
+			Task.Factory.StartNew(() => _messageSerializer.SerializeAsync(TaskHelpers.FromResult(response), memoryStream).Wait()).Wait();
 			response.RequestMessage = req;
-			_responseCache.Set(key.HashBase64, memoryStream.ToArray(), DateTimeOffset.Now);
+			_responseCache.Set(key.HashBase64, memoryStream.ToArray(), DateTimeOffset.Now.AddDays(1));
 		}
 
 		public bool TryRemove(CacheKey key)

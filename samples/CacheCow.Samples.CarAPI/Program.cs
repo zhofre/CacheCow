@@ -9,10 +9,7 @@ namespace CacheCow.Samples.CarAPI
         public static void Main(string[] args)
         {
             Console.WriteLine("CarAPI starting...");
-
             BuildWebHost(args).Run();
-
-            Console.ReadLine();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>

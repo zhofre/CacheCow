@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using CacheCow.Samples.CarAPI.Services;
 using CacheCow.Server.Core.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
@@ -26,12 +28,18 @@ namespace CacheCow.Samples.CarAPI
                         new CamelCasePropertyNamesContractResolver();
                 });
 
+            // url helper
+            services.AddScoped<IActionContextAccessor, ActionContextAccessor>();
+
             // caching support
             services.AddHttpCachingMvc();
             services.AddResponseCaching();
 
             // automapper
             services.AddSingleton(_ => new MapperConfiguration(ConfigureMapping).CreateMapper());
+
+            // register
+            services.AddSingleton<ICarRepository, InMemoryCarRepository>();
         }
 
         private void ConfigureMapping(IMapperConfigurationExpression cfg)

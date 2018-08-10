@@ -1,0 +1,23 @@
+﻿using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using System;
+
+namespace CacheCow.Samples.CarAPI
+{
+    class Program
+    {
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("CarAPI starting...");
+
+            BuildWebHost(args).Run();
+
+            Console.ReadLine();
+        }
+
+        public static IWebHost BuildWebHost(string[] args) =>
+           WebHost.CreateDefaultBuilder(args)
+               .UseStartup<Startup>()
+               .Build();
+    }
+}

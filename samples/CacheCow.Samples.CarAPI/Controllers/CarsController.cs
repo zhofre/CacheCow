@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CacheCow.Samples.CarAPI.Helpers;
 using CacheCow.Samples.CarAPI.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -35,19 +36,34 @@ namespace CacheCow.Samples.CarAPI.Controllers
         public IActionResult GetCars([FromQuery] RequestParameters requestParameters)
         {
             var itemsFromRepo = _repository.Get(requestParameters);
-            
+
+            var urlHelper = CreateUrlHelper();
             dynamic paginationData = CreatePaginationData(
                 nameof(GetCars),
                 requestParameters,
                 itemsFromRepo.TotalCount,
-                UrlHelper);
+                urlHelper);
             Response.Headers["X-Pagination"] = JsonConvert.SerializeObject(paginationData);
 
-            var dtos = Map(itemsFromRepo, requestParameters, paginationData.totalPages, UrlHelper);
+            var dtos = Map(itemsFromRepo, requestParameters, paginationData.totalPages, urlHelper);
             return Ok(dtos);
         }
 
-        private IUrlHelper UrlHelper => _urlHelperFactory.GetUrlHelper(_contextAccessor.ActionContext);
+        [HttpGet("{id}", Name = nameof(GetCar))]
+        public IActionResult GetCar(int id)
+        {
+            var itemFromRepo = _repository.Get(id);
+            if (itemFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var urlHelper = CreateUrlHelper();
+            var dto = Map(itemFromRepo, urlHelper);
+            return Ok(dto);
+        }
+        
+        private IUrlHelper CreateUrlHelper() => _urlHelperFactory.GetUrlHelper(_contextAccessor.ActionContext);
 
         private static object CreatePaginationData(
             string requestName,
@@ -108,7 +124,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
                 cars.Links.Add(new Dto.Link(
                     parameters.CreateResourceUri(
                         ResourceUriType.PreviousPage,
-                        $"GetCars",
+                        nameof(GetCars),
                         urlHelper),
                     "previousPage",
                     "GET"));
@@ -117,7 +133,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
             cars.Links.Add(new Dto.Link(
                 parameters.CreateResourceUri(
                     ResourceUriType.CurrentPage,
-                    $"GetCars",
+                    nameof(GetCars),
                     urlHelper),
                 "self",
                 "GET"));
@@ -127,7 +143,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
                 cars.Links.Add(new Dto.Link(
                     parameters.CreateResourceUri(
                         ResourceUriType.NextPage,
-                        $"GetCars",
+                        nameof(GetCars),
                         urlHelper),
                     "nextPage",
                     "GET"));
@@ -140,6 +156,10 @@ namespace CacheCow.Samples.CarAPI.Controllers
             Dto.Car car,
             IUrlHelper urlHelper)
         {
+            car.Links.Add(new Dto.Link(
+                urlHelper.Link(nameof(GetCar), new { id = car.Id }),
+                "self",
+                "GET"));
             return car;
         }
     }

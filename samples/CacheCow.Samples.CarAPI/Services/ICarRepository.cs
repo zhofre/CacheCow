@@ -8,5 +8,6 @@ namespace CacheCow.Samples.CarAPI.Services
     public interface ICarRepository
     {
         PagedList<Entities.Car> Get(RequestParameters requestParameters);
+        Entities.Car Get(int id);
     }
 }

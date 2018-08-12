@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "289ee55c-0467-441e-82ec-e6285c87e66a",
-		"name": "CacheCowAdvancedSample",
+		"name": "CarAPI",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -21,6 +21,41 @@
 					"path": [
 						"api",
 						"cars"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get first page of cars with data shaping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:5000/api/cars?pageNumber=1&pageSize=3&fields=brand,color",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"cars"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "1"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "fields",
+							"value": "brand,color"
+						}
 					]
 				}
 			},
@@ -49,6 +84,34 @@
 			"response": []
 		},
 		{
+			"name": "Get car 1 with data shaping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:5000/api/cars/1?fields=year,owner",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"cars",
+						"1"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "year,owner"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create a car",
 			"request": {
 				"method": "POST",
@@ -60,7 +123,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\tyear:1967,\n\tnumberPlate: \"1-ABC-123\"\n}"
+					"raw": "{\n\tyear:1967,\n\tnumberPlate: \"1-ABC-123\",\n\tbrand: \"Citroën\",\n\tcolor: \"White\",\n\towner: \"Jean Doux\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:5000/api/cars",
@@ -119,7 +182,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\tnumberPlate: \"ZYX-987\"\n}"
+					"raw": "{\n\tnumberPlate: \"ZYX-987\",\n\towner: \"John Doe II\",\n\tcolor: \"DarkGreen\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:5000/api/cars/1",

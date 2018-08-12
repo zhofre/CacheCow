@@ -33,7 +33,9 @@ namespace CacheCow.Samples.CarAPI.Controllers
         }
 
         [HttpGet(Name = nameof(GetCars))]
-        public IActionResult GetCars([FromQuery] RequestParameters requestParameters)
+        public IActionResult GetCars(
+            [FromQuery] RequestParameters requestParameters,
+            [FromQuery] string fields)
         {
             var itemsFromRepo = _repository.Get(requestParameters);
 
@@ -45,12 +47,15 @@ namespace CacheCow.Samples.CarAPI.Controllers
                 urlHelper);
             Response.Headers["X-Pagination"] = JsonConvert.SerializeObject(paginationData);
 
-            var dtos = Map(itemsFromRepo, requestParameters, paginationData.totalPages, urlHelper);
-            return Ok(dtos);
+            Dto.LinkedResourceCollection<Dto.Car> dtos = Map(itemsFromRepo, requestParameters, paginationData.totalPages, urlHelper);  // when using var, dynamic is inferred?
+
+            var fieldList = ExtractFields(fields, "id", "links");
+            var result = dtos.ShapeCollection(fieldList);
+            return Ok(result);
         }
 
         [HttpGet("{id}", Name = nameof(GetCar))]
-        public IActionResult GetCar(int id)
+        public IActionResult GetCar(int id, [FromQuery] string fields)
         {
             var itemFromRepo = _repository.Get(id);
             if (itemFromRepo == null)
@@ -60,7 +65,10 @@ namespace CacheCow.Samples.CarAPI.Controllers
 
             var urlHelper = CreateUrlHelper();
             var dto = Map(itemFromRepo, urlHelper);
-            return Ok(dto);
+
+            var fieldList = ExtractFields(fields, "links");
+            var result = dto.Shape(fieldList);
+            return Ok(result);
         }
 
         [HttpPost(Name = nameof(CreateCar))]
@@ -234,6 +242,14 @@ namespace CacheCow.Samples.CarAPI.Controllers
                     "delete",
                     "DELETE"));
             return car;
+        }
+
+        private List<string> ExtractFields(string fields, params string[] obligedFields)
+        {
+            return fields?.ParseFieldsFromQueryString()
+                ?.Concat(obligedFields)
+                .Distinct()
+                .ToList();
         }
     }
 }

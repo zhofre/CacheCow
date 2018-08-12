@@ -15,7 +15,10 @@ namespace CacheCow.Samples.CarAPI.Services
                 Id = 1,
                 LastModified = DateTimeOffset.Now,
                 NumberPlate = "XYZ-123",
-                Year = 2017
+                Year = 2017,
+                Brand = "Jaguar",
+                Owner = "John Doe",
+                Color = "DarkGreen"
             }
         };
 

@@ -28,29 +28,25 @@ namespace CacheCow.Samples.CarAPI.Helpers
           IUrlHelper urlHelper,
           object additionalValues = null)
         {
-            dynamic values = new
-            {
-                pageNumber = PageNumber,
-                pageSize = PageSize
-            };
-
+            var pageNumber = PageNumber;
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    values.pageNumber = values.pageNumber - 1;
-                    return urlHelper.Link(
-                        name,
-                        values);
+                    pageNumber--;
+                    break;
                 case ResourceUriType.NextPage:
-                    values.pageNumber = values.pageNumber + 1;
-                    return urlHelper.Link(
-                        name,
-                        values);
+                    pageNumber++;
+                    break;
                 default:
-                    return urlHelper.Link(
-                        name,
-                        values);
+                    break;
             }
+            return urlHelper.Link(
+                name,
+                new
+                {
+                    pageNumber = pageNumber,
+                    pageSize = PageSize
+                });
         }
 
     }

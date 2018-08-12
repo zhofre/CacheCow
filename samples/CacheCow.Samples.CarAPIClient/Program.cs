@@ -1,6 +1,6 @@
 ﻿using CacheCow.Client;
 using System;
-using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace CacheCow.Samples.CarAPIClient
 {
@@ -13,7 +13,9 @@ namespace CacheCow.Samples.CarAPIClient
             var client = ClientExtensions.CreateClient();
             client.BaseAddress = new Uri("http://localhost:5123");
 
-            // todo: add console menu
+            var p = new ConsoleMenu(client);
+
+            Task.Run(async () => await p.Menu()).Wait();
         }
     }
 }

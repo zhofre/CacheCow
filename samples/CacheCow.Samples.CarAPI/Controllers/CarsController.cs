@@ -89,6 +89,39 @@ namespace CacheCow.Samples.CarAPI.Controllers
                 ? new StatusCodeResult(StatusCodes.Status409Conflict)
                 : NotFound();
         }
+
+        [HttpPut("{id}", Name = nameof(UpdateCar))]
+        public IActionResult UpdateCar(int id, [FromBody] Dto.CarForManipulation input)
+        {
+            if (input == null)
+            {
+                return BadRequest();
+            }
+
+            var entity = _repository.Get(id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            var entityForRepo = _mapper.Map(input, entity);
+            _repository.Update(entityForRepo);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}", Name = nameof(DeleteCar))]
+        public IActionResult DeleteCar(int id)
+        {
+            if(!_repository.Exists(id))
+            {
+                return NotFound();
+            }
+
+            _repository.Delete(id);
+
+            return NoContent();
+        }
         
         private IUrlHelper CreateUrlHelper() => _urlHelperFactory.GetUrlHelper(_contextAccessor.ActionContext);
 
@@ -192,6 +225,14 @@ namespace CacheCow.Samples.CarAPI.Controllers
                 urlHelper.Link(nameof(GetCar), new { id = car.Id }),
                 "self",
                 "GET"));
+            car.Links.Add(new Dto.Link(
+                    urlHelper.Link(nameof(UpdateCar), new { id = car.Id }),
+                    "update",
+                    "PUT"));
+            car.Links.Add(new Dto.Link(
+                    urlHelper.Link(nameof(DeleteCar), new { id = car.Id }),
+                    "delete",
+                    "DELETE"));
             return car;
         }
     }

@@ -11,5 +11,7 @@ namespace CacheCow.Samples.CarAPI.Services
         Entities.Car Get(int id);
         Entities.Car Add(Entities.Car newCar);
         bool Exists(int id);
+        Entities.Car Update(Entities.Car updatedCar);
+        void Delete(int id);
     }
 }

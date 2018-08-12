@@ -50,5 +50,21 @@ namespace CacheCow.Samples.CarAPI.Services
         {
             return _cars.Any(c => c.Id == id);
         }
+
+        public Car Update(Car updatedCar)
+        {
+            updatedCar.LastModified = DateTimeOffset.Now;
+            var index = _cars
+                .Select((c, i) => (c, i))
+                .First(t => t.Item1.Id == updatedCar.Id)
+                .Item2;
+            _cars[index] = updatedCar;
+            return updatedCar;
+        }
+
+        public void Delete(int id)
+        {
+            _cars.RemoveAll(c => c.Id == id);
+        }
     }
 }

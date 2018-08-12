@@ -22,7 +22,9 @@ namespace CacheCow.Samples.CarAPI.Services
         public PagedList<Car> Get(RequestParameters requestParameters)
         {
             if (requestParameters.PageNumber < 1 || requestParameters.PageSize < 1)
+            {
                 return null;
+            }
 
             var cnt = _cars.Count;
             var items = _cars
@@ -34,6 +36,19 @@ namespace CacheCow.Samples.CarAPI.Services
         public Car Get(int id)
         {
             return _cars.FirstOrDefault(c => c.Id == id);
+        }
+
+        public Car Add(Car newCar)
+        {
+            newCar.Id = _cars.Select(c => c.Id).Max() + 1;
+            newCar.LastModified = DateTimeOffset.Now;
+            _cars.Add(newCar);
+            return newCar;
+        }
+
+        public bool Exists(int id)
+        {
+            return _cars.Any(c => c.Id == id);
         }
     }
 }

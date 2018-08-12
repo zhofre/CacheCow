@@ -9,5 +9,7 @@ namespace CacheCow.Samples.CarAPI.Services
     {
         PagedList<Entities.Car> Get(RequestParameters requestParameters);
         Entities.Car Get(int id);
+        Entities.Car Add(Entities.Car newCar);
+        bool Exists(int id);
     }
 }

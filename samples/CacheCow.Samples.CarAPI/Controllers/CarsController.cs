@@ -62,6 +62,33 @@ namespace CacheCow.Samples.CarAPI.Controllers
             var dto = Map(itemFromRepo, urlHelper);
             return Ok(dto);
         }
+
+        [HttpPost(Name = nameof(CreateCar))]
+        public IActionResult CreateCar([FromBody] Dto.CarForCreation input)
+        {
+            if (input == null)
+            {
+                return BadRequest();
+            }
+
+            var entity = _mapper.Map<Entities.Car>(input);
+            var savedEntity = _repository.Add(entity);
+
+            var urlHelper = CreateUrlHelper();
+            var dto = Map(savedEntity, urlHelper);
+            return CreatedAtRoute(
+                nameof(GetCar),
+                new { id = entity.Id },
+                dto);
+        }
+        
+        [HttpPost("{id}")]
+        public IActionResult BlockCarCreation(int id)
+        {
+            return _repository.Exists(id)
+                ? new StatusCodeResult(StatusCodes.Status409Conflict)
+                : NotFound();
+        }
         
         private IUrlHelper CreateUrlHelper() => _urlHelperFactory.GetUrlHelper(_contextAccessor.ActionContext);
 
@@ -148,6 +175,11 @@ namespace CacheCow.Samples.CarAPI.Controllers
                     "nextPage",
                     "GET"));
             }
+
+            cars.Links.Add(new Dto.Link(
+                    urlHelper.Link(nameof(CreateCar), null),
+                    "create",
+                    "POST"));
 
             return cars;
         }

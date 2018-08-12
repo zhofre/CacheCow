@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CacheCow.Client;
+using System;
+using System.Net.Http;
 
 namespace CacheCow.Samples.CarAPIClient
 {
@@ -8,7 +10,10 @@ namespace CacheCow.Samples.CarAPIClient
         {
             Console.WriteLine("CarAPI Client");
 
-            Console.ReadLine();
+            var client = ClientExtensions.CreateClient();
+            client.BaseAddress = new Uri("http://localhost:5123");
+
+            // todo: add console menu
         }
     }
 }

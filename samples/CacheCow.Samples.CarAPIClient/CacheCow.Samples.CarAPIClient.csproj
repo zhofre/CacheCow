@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CacheCow.Client\CacheCow.Client.csproj" />
     <ProjectReference Include="..\CacheCow.Samples.CarAPI.Dto\CacheCow.Samples.CarAPI.Dto.csproj" />
   </ItemGroup>
 

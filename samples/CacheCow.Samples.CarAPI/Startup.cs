@@ -1,6 +1,6 @@
-﻿using System.Xml;
-using AutoMapper;
+﻿using AutoMapper;
 using CacheCow.Samples.CarAPI.Services;
+using CacheCow.Server;
 using CacheCow.Server.Core.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -36,6 +36,10 @@ namespace CacheCow.Samples.CarAPI
             // caching support
             services.AddHttpCachingMvc();
             services.AddResponseCaching();
+            services.AddQueryProviderAndExtractorForViewModelMvc<
+                Dto.Car,
+                CarTimedETagQueryProvider, 
+                CarTimedETagExtractor>(false);
 
             // automapper
             services.AddSingleton(_ => new MapperConfiguration(ConfigureMapping).CreateMapper());

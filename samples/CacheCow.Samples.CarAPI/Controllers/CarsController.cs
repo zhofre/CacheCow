@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CacheCow.Server.Core.Mvc;
 
 namespace CacheCow.Samples.CarAPI.Controllers
 {
@@ -55,6 +56,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
         }
 
         [HttpGet("{id}", Name = nameof(GetCar))]
+        [HttpCacheFactory(60, ViewModelType = typeof(Dto.Car))]
         public IActionResult GetCar(int id, [FromQuery] string fields)
         {
             var itemFromRepo = _repository.Get(id);
@@ -72,6 +74,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
         }
 
         [HttpGet("last", Name = nameof(GetLastCar))]
+        [HttpCacheFactory(0, ViewModelType = typeof(Dto.Car))]
         public IActionResult GetLastCar([FromQuery] string fields)
         {
             var itemFromRepo = _repository.Last();

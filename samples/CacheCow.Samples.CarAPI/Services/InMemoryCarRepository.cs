@@ -13,12 +13,32 @@ namespace CacheCow.Samples.CarAPI.Services
             new Car
             {
                 Id = 1,
-                LastModified = DateTimeOffset.Now,
+                LastModified = new DateTimeOffset(2018,01,01,0,0,0, TimeSpan.Zero),
                 NumberPlate = "XYZ-123",
                 Year = 2017,
                 Brand = "Jaguar",
                 Owner = "John Doe",
                 Color = "DarkGreen"
+            },
+            new Car
+            {
+                Id = 2,
+                LastModified = new DateTimeOffset(2018,02,01,0,0,0, TimeSpan.Zero),
+                NumberPlate = "ABC-123",
+                Year = 2017,
+                Brand = "BMW",
+                Owner = "Jean Doux",
+                Color = "LightBlue"
+            },
+            new Car
+            {
+                Id = 3,
+                LastModified = new DateTimeOffset(2018,02,03,0,0,0, TimeSpan.Zero),
+                NumberPlate = "XYZ-987",
+                Year = 2017,
+                Brand = "Mercedes",
+                Owner = "Jane Doe",
+                Color = "KingsBlue"
             }
         };
 

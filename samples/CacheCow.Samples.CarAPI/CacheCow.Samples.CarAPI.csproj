@@ -18,4 +18,10 @@
     <ProjectReference Include="..\CacheCow.Samples.CarAPI.Dto\CacheCow.Samples.CarAPI.Dto.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Web.Http">
+      <HintPath>..\..\..\..\..\Users\SIDDGEO\.nuget\packages\microsoft.aspnet.webapi.core\5.2.5\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

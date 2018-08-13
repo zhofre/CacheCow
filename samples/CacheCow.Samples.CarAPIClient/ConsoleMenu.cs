@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using CacheCow.Client.Headers;
@@ -12,7 +15,11 @@ namespace CacheCow.Samples.CarAPIClient
     public class ConsoleMenu
     {
         private readonly HttpClient _client;
+        private readonly Random _rnd = new Random();
         private bool _verbose = false;
+        private readonly string[] _brands = new[] {"Audi", "BMW", "Citroën", "Jaguar", "Renault", "Seat"};
+        private readonly string[] _colors = new[] { "RoyalBlue", "DarkRed", "PearlWhite", "CarbonBlack", "Antracite", "LightBlue" };
+        private readonly string[] _owners = new[] { "John Doe", "Jean Doux", "Jan Doo", "Jane Doe", "Jeanne Doux", "Janneke Doo" };
 
         public ConsoleMenu(HttpClient client)
         {
@@ -27,13 +34,11 @@ namespace CacheCow.Samples.CarAPIClient
 @"CacheCow CarAPI Sample - (ASP.NET Core Service and HttpClient)
     - Press A to list all cars
     - Press Z to list data shaped cars (number plate and owner)
-    - Press L to get the last item (default which is JSON)
-    - Press X to get the last item in XML
+    - Press L to get the last item
     - Press C to create a new car and add to repo
-    - Press U to update the last item (updates last modified)
-    - Press O to update the last item outside API (updates last modified)
+    - Press U to update the first item (updates number plate, owner, color and last modified)
     - Press D to delete the last item
-    - Press F to delete the first item
+    - Press F to delete the car with id 1
     - Press V to toggle on/off verbose header dump
     - Press Q to exit
 "
@@ -52,35 +57,27 @@ namespace CacheCow.Samples.CarAPIClient
                             break;
                         case 'z':
                         case 'Z':
-                            //await ListAllDataShaped();
+                            await ListAllDataShaped();
                             break;
                         case 'C':
                         case 'c':
-                            //await CreateNew();
+                            await CreateNew();
                             break;
                         case 'U':
                         case 'u':
-                            //await UpdateLast();
-                            break;
-                        case 'O':
-                        case 'o':
-                            //await UpdateLastOutsideApi();
+                            await UpdateFirst();
                             break;
                         case 'D':
                         case 'd':
-                            //await DeleteLast();
+                            await DeleteLast();
                             break;
                         case 'L':
                         case 'l':
-                            //await GetLast();
-                            break;
-                        case 'X':
-                        case 'x':
-                            //await GetLastInXml();
+                            await GetLast();
                             break;
                         case 'F':
                         case 'f':
-                            //await DeleteFirst();
+                            await DeleteFirst();
                             break;
                         case 'V':
                         case 'v':
@@ -125,13 +122,116 @@ namespace CacheCow.Samples.CarAPIClient
 
             foreach (var c in cars.Content)
             {
-                Console.WriteLine($"| {c.Id}\t| {c.NumberPlate}\t| {c.Owner}\t| {c.Brand}\t| {c.Color}\t| {c.Year}\t| {c.LastModified}\t|");
+                Console.WriteLine($"| {c.Id}\t| {c.NumberPlate}\t| {c.Owner}\t| {c.Brand,6}\t| {c.Color}\t| {c.Year}\t| {c.LastModified}\t|");
             }
 
             Console.WriteLine(new string('-', 113));
             Console.ResetColor();
 
             DumpHeaders(response);
+        }
+
+        public async Task ListAllDataShaped()
+        {
+            var response = await _client.GetAsync("/api/cars?fields=numberPlate,owner");
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            await response.Content.LoadIntoBufferAsync();
+            WriteCacheCowHeader(response);
+            Console.ForegroundColor = ConsoleColor.White;
+            var cars = await response.Content.ReadAsAsync<CarAPI.Dto.LinkedResourceCollection<CarAPI.Dto.Car>>();
+
+            Console.WriteLine(new string('-', 73));
+            Console.WriteLine($"| Id\t| NumberPlate\t| Owner\t\t| Last Modified Date\t\t|");
+
+            foreach (var c in cars.Content)
+            {
+                Console.WriteLine($"| {c.Id}\t| {c.NumberPlate}\t| {c.Owner}\t| {c.LastModified}\t|");
+            }
+
+            Console.WriteLine(new string('-', 73));
+            Console.ResetColor();
+
+            DumpHeaders(response);
+        }
+
+        public async Task CreateNew()
+        {
+            var newCar = new CarAPI.Dto.CarForCreation
+            {
+                Brand = _brands[_rnd.Next(0, 6)],
+                Color = _colors[_rnd.Next(0, 6)],
+                NumberPlate = CreateNumberPlate(),
+                Owner = _owners[_rnd.Next(0, 6)],
+                Year = 1990 + _rnd.Next(0, 28)
+            };
+            var response = await _client.PostAsync("/api/cars", newCar, new JsonMediaTypeFormatter());
+            WriteCacheCowHeader(response);
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine($"Location header: {response.Headers.Location}");
+            Console.WriteLine();
+            Console.ResetColor();
+
+            DumpHeaders(response);
+        }
+
+        public async Task GetLast()
+        {
+            var response = await _client.GetAsync("/api/cars/last");
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            WriteCacheCowHeader(response);
+            Console.ForegroundColor = ConsoleColor.White;
+            var c = await response.Content.ReadAsAsync<CarAPI.Dto.Car>();
+            Console.WriteLine($"| {c.Id}\t| {c.NumberPlate}\t| {c.Owner}\t| {c.Brand,6}\t| {c.Color}\t| {c.Year}\t| {c.LastModified}\t|");
+            Console.WriteLine();
+            Console.ResetColor();
+            DumpHeaders(response);
+        }
+
+        public async Task UpdateFirst()
+        {
+            var updatedCar = new CarAPI.Dto.CarForManipulation
+            {
+                Color = _colors[_rnd.Next(0, 6)],
+                NumberPlate = CreateNumberPlate(),
+                Owner = _owners[_rnd.Next(0, 6)]
+            };
+
+            var response = await _client.PutAsync("/api/cars/1", updatedCar, new JsonMediaTypeFormatter());
+            WriteCacheCowHeader(response);
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            DumpHeaders(response);
+        }
+
+        public async Task DeleteLast()
+        {
+            var response = await _client.DeleteAsync("/api/cars/last");
+            WriteCacheCowHeader(response);
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            DumpHeaders(response);
+        }
+
+        public async Task DeleteFirst()
+        {
+            var response = await _client.DeleteAsync("/api/cars/1");
+            WriteCacheCowHeader(response);
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            DumpHeaders(response);
+        }
+
+        private string CreateNumberPlate()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            return new string(new []
+                   {
+                       chars[_rnd.Next(0, 26)],
+                       chars[_rnd.Next(0, 26)],
+                       chars[_rnd.Next(0, 26)]
+                   })
+                + "-"
+                + _rnd.Next(0, 10)
+                + _rnd.Next(0, 10)
+                + _rnd.Next(0, 10);
         }
 
         public void DumpHeaders(HttpResponseMessage response)

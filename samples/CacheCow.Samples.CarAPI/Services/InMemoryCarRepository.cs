@@ -69,5 +69,11 @@ namespace CacheCow.Samples.CarAPI.Services
         {
             _cars.RemoveAll(c => c.Id == id);
         }
+
+        /// <inheritdoc />
+        public Car Last()
+        {
+            return _cars.LastOrDefault();
+        }
     }
 }

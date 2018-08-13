@@ -49,7 +49,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
 
             Dto.LinkedResourceCollection<Dto.Car> dtos = Map(itemsFromRepo, requestParameters, paginationData.totalPages, urlHelper);  // when using var, dynamic is inferred?
 
-            var fieldList = ExtractFields(fields, "id", "links");
+            var fieldList = ExtractFields(fields, "id", "lastModified");
             var result = dtos.ShapeCollection(fieldList);
             return Ok(result);
         }
@@ -66,7 +66,24 @@ namespace CacheCow.Samples.CarAPI.Controllers
             var urlHelper = CreateUrlHelper();
             var dto = Map(itemFromRepo, urlHelper);
 
-            var fieldList = ExtractFields(fields, "links");
+            var fieldList = ExtractFields(fields, "lastModified");
+            var result = dto.Shape(fieldList);
+            return Ok(result);
+        }
+
+        [HttpGet("last", Name = nameof(GetLastCar))]
+        public IActionResult GetLastCar([FromQuery] string fields)
+        {
+            var itemFromRepo = _repository.Last();
+            if (itemFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var urlHelper = CreateUrlHelper();
+            var dto = Map(itemFromRepo, urlHelper);
+
+            var fieldList = ExtractFields(fields, "lastModified");
             var result = dto.Shape(fieldList);
             return Ok(result);
         }
@@ -118,6 +135,26 @@ namespace CacheCow.Samples.CarAPI.Controllers
             return NoContent();
         }
 
+        [HttpPut("last", Name = nameof(UpdateLastCar))]
+        public IActionResult UpdateLastCar([FromBody] Dto.CarForManipulation input)
+        {
+            if (input == null)
+            {
+                return BadRequest();
+            }
+
+            var entity = _repository.Last();
+            if (entity == null)
+            {
+                return NotFound();
+            }
+
+            var entityForRepo = _mapper.Map(input, entity);
+            _repository.Update(entityForRepo);
+
+            return NoContent();
+        }
+
         [HttpDelete("{id}", Name = nameof(DeleteCar))]
         public IActionResult DeleteCar(int id)
         {
@@ -130,7 +167,21 @@ namespace CacheCow.Samples.CarAPI.Controllers
 
             return NoContent();
         }
-        
+
+        [HttpDelete("last", Name = nameof(DeleteLastCar))]
+        public IActionResult DeleteLastCar()
+        {
+            var lastCar = _repository.Last();
+            if (lastCar == null)
+            {
+                return NotFound();
+            }
+
+            _repository.Delete(lastCar.Id);
+
+            return NoContent();
+        }
+
         private IUrlHelper CreateUrlHelper() => _urlHelperFactory.GetUrlHelper(_contextAccessor.ActionContext);
 
         private static object CreatePaginationData(

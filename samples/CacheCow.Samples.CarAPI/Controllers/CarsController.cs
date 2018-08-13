@@ -57,6 +57,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
 
         [HttpGet("{id}", Name = nameof(GetCar))]
         [HttpCacheFactory(60, ViewModelType = typeof(Dto.Car))]
+        [ResponseCache(VaryByQueryKeys = new [] { "fields" }, Duration = 60)]
         public IActionResult GetCar(int id, [FromQuery] string fields)
         {
             var itemFromRepo = _repository.Get(id);

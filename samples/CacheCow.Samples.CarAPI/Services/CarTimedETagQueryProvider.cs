@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using CacheCow.Server;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,24 @@ namespace CacheCow.Samples.CarAPI.Services
         public Task<TimedEntityTagHeaderValue> QueryAsync(HttpContext context)
         {
             var routeData = context.GetRouteData();
-            throw new System.NotImplementedException();
+            var path = context.Request.Path.ToString().ToLowerInvariant();
+
+            Entities.Car car = null;
+            if (path.EndsWith("last"))
+            {
+                car = _repository.Last();
+            }
+            else if(routeData.Values.ContainsKey("id"))
+            {
+                car = _repository.Get(Convert.ToInt32(routeData.Values["id"]));
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            var dto = _mapper.Map<Dto.Car>(car);
+            return Task.FromResult(_extractor.Extract(dto));
         }
     }
 }

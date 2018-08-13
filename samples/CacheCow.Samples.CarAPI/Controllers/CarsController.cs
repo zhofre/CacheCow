@@ -120,6 +120,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
         }
 
         [HttpPut("{id}", Name = nameof(UpdateCar))]
+        [HttpCacheFactory(0, ViewModelType = typeof(Dto.Car))]
         public IActionResult UpdateCar(int id, [FromBody] Dto.CarForManipulation input)
         {
             if (input == null)
@@ -140,6 +141,7 @@ namespace CacheCow.Samples.CarAPI.Controllers
         }
 
         [HttpPut("last", Name = nameof(UpdateLastCar))]
+        [HttpCacheFactory(0, ViewModelType = typeof(Dto.Car))]
         public IActionResult UpdateLastCar([FromBody] Dto.CarForManipulation input)
         {
             if (input == null)

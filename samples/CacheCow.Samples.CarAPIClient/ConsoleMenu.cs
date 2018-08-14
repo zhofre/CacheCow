@@ -35,6 +35,7 @@ namespace CacheCow.Samples.CarAPIClient
     - Press A to list all cars
     - Press Z to list data shaped cars (number plate and owner)
     - Press L to get the last item
+    - Press M to get the last item data shaped
     - Press C to create a new car and add to repo
     - Press U to update the first item (updates number plate, owner, color and last modified)
     - Press D to delete the last item
@@ -74,6 +75,10 @@ namespace CacheCow.Samples.CarAPIClient
                         case 'L':
                         case 'l':
                             await GetLast();
+                            break;
+                        case 'M':
+                        case 'm':
+                            await GetLastDataShaped();
                             break;
                         case 'F':
                         case 'f':
@@ -178,6 +183,19 @@ namespace CacheCow.Samples.CarAPIClient
         public async Task GetLast()
         {
             var response = await _client.GetAsync("/api/cars/last");
+            await response.WhatEnsureSuccessShouldHaveBeen();
+            WriteCacheCowHeader(response);
+            Console.ForegroundColor = ConsoleColor.White;
+            var c = await response.Content.ReadAsAsync<CarAPI.Dto.Car>();
+            Console.WriteLine($"| {c.Id}\t| {c.NumberPlate}\t| {c.Owner}\t| {c.Brand,6}\t| {c.Color}\t| {c.Year}\t| {c.LastModified}\t|");
+            Console.WriteLine();
+            Console.ResetColor();
+            DumpHeaders(response);
+        }
+
+        public async Task GetLastDataShaped()
+        {
+            var response = await _client.GetAsync("/api/cars/last?fields=numberPlate,owner");
             await response.WhatEnsureSuccessShouldHaveBeen();
             WriteCacheCowHeader(response);
             Console.ForegroundColor = ConsoleColor.White;
